@@ -28,6 +28,7 @@ var SupportedRequestFlags = map[string]bool{
 	"--user-agent":     true,
 	"-u":               true,
 	"--user":           true,
+	"--oauth2-bearer":  true,
 	"-k":               true,
 	"--insecure":       true,
 	"-L":               true,
@@ -115,6 +116,12 @@ func NewRequestFromFlagSet(fs *FlagSet) (client *http.Client, req *http.Request,
 		headers = append(headers, [2]string{
 			"Authorization",
 			"Basic " + base64.StdEncoding.EncodeToString([]byte(flg.Value(-1))),
+		})
+	}
+	if flg := fs.LongFlag("oauth2-bearer"); flg.IsSet {
+		headers = append(headers, [2]string{
+			"Authorization",
+			"Bearer " + flg.Value(-1),
 		})
 	}
 	if flg := fs.LongFlag("insecure"); flg.IsSet {

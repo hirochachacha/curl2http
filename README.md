@@ -70,6 +70,7 @@ Supported flags
  -H, --header <header/@file> Pass custom header(s) to server
  -k, --insecure      Allow insecure server connections when using SSL
  -L, --location      Follow redirects
+     --oauth2-bearer <token> OAuth 2 Bearer Token
  -X, --request <command> Specify request command to use
      --url <url>     URL to work with
  -u, --user <user:password> Server user and password
