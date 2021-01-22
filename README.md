@@ -68,6 +68,7 @@ Supported flags
  -I, --head          Show document info only
  -H, --header <header/@file> Pass custom header(s) to server
  -k, --insecure      Allow insecure server connections when using SSL
+ -L, --location      Follow redirects
  -X, --request <command> Specify request command to use
      --url <url>     URL to work with
  -u, --user <user:password> Server user and password

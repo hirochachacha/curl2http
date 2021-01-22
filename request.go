@@ -30,6 +30,8 @@ var SupportedRequestFlags = map[string]bool{
 	"--user":           true,
 	"-k":               true,
 	"--insecure":       true,
+	"-L":               true,
+	"--location":       true,
 	"-d":               true,
 	"--data":           true,
 	"--data-ascii":     true,
@@ -117,6 +119,11 @@ func NewRequestFromFlagSet(fs *FlagSet) (client *http.Client, req *http.Request,
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
 			},
+		}
+	}
+	if flg := fs.LongFlag("location"); !flg.IsSet {
+		client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
 		}
 	}
 	for _, name := range []string{"data", "data-ascii", "data-raw", "data-urlencode", "data-binary"} {
