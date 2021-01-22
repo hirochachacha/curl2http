@@ -38,6 +38,8 @@ var SupportedRequestFlags = map[string]bool{
 	"--data-raw":       true,
 	"--data-urlencode": true,
 	"--data-binary":    true,
+	"-G":               true,
+	"--get":            true,
 	"-F":               true,
 	"--form":           true,
 	"--url":            true,
@@ -58,6 +60,7 @@ func NewRequestFromFlagSet(fs *FlagSet) (client *http.Client, req *http.Request,
 	var (
 		method      string
 		_url        string
+		rawQuery    string
 		body        io.Reader
 		headers     [][2]string
 		host        string
@@ -194,6 +197,24 @@ func NewRequestFromFlagSet(fs *FlagSet) (client *http.Client, req *http.Request,
 		}
 	}
 
+	if flg := fs.LongFlag("get"); flg.IsSet {
+		if flg = fs.LongFlag("data-binary"); flg.IsSet {
+			return nil, nil, fmt.Errorf("cannot use --get with --data-binary")
+		}
+
+		method = "GET"
+		contentType = ""
+
+		if body != nil {
+			bs, err := ioutil.ReadAll(body)
+			if err != nil {
+				return nil, nil, err
+			}
+			rawQuery = string(bs)
+			body = nil
+		}
+	}
+
 	if flg := fs.LongFlag("form"); flg.IsSet {
 		if body != nil {
 			return nil, nil, fmt.Errorf("request body is already filled")
@@ -303,12 +324,19 @@ func NewRequestFromFlagSet(fs *FlagSet) (client *http.Client, req *http.Request,
 		return nil, nil, err
 	}
 
-	if u.Scheme == "" {
-		u.Scheme = "http"
-		_url = u.String()
+	if rawQuery != "" {
+		if u.RawQuery != "" {
+			u.RawQuery += "&" + rawQuery
+		} else {
+			u.RawQuery = rawQuery
+		}
 	}
 
-	req, err = http.NewRequest(method, _url, body)
+	if u.Scheme == "" {
+		u.Scheme = "http"
+	}
+
+	req, err = http.NewRequest(method, u.String(), body)
 	if err != nil {
 		return nil, nil, err
 	}

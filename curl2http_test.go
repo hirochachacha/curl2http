@@ -62,7 +62,7 @@ func TestRequest(t *testing.T) {
 		t.Errorf("want %q, but %q", "a=b&c=de", string(body))
 	}
 
-	_, req, err = curl2http.NewRequestFromArgs([]string{"curl", "-X", "POST", "-d", "@testdata/data.txt", "-d", "@testdata/data2.txt", "https://www.example.com/post"})
+	_, req, err = curl2http.NewRequestFromArgs([]string{"curl", "-d", "@testdata/data.txt", "-d", "@testdata/data2.txt", "https://www.example.com/post"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,6 +75,17 @@ func TestRequest(t *testing.T) {
 	body, err = ioutil.ReadAll(req.Body)
 	if string(body) != "a=b&c=d&e=f&g=h" {
 		t.Errorf("want %q, but %q", "a=b&c=d&e=f&g=h", string(body))
+	}
+
+	_, req, err = curl2http.NewRequestFromArgs([]string{"curl", "-G", "-d", "@testdata/data.txt", "-d", "@testdata/data2.txt", "https://www.example.com/get"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if req.URL.String() != "https://www.example.com/get?a=b&c=d&e=f&g=h" {
+		t.Errorf("want %q, but %q", "https://www.example.com/get?a=b&c=d&e=f&g=h", req.URL.String())
+	}
+	if req.Header.Get("Content-Type") != "" {
+		t.Errorf("want %q, but %q", "", req.Header.Get("Content-Type"))
 	}
 
 	json := "{\n\t\"FirstName\": \"hiro\", \n\t\"Age\": 4444\n}"

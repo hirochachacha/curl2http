@@ -65,6 +65,7 @@ Supported flags
      --data-raw <data> HTTP POST data, '@' allowed
      --data-urlencode <data> HTTP POST data url encoded
  -F, --form <name=content> Specify multipart MIME data
+ -G, --get           Put the post data in the URL and use GET
  -I, --head          Show document info only
  -H, --header <header/@file> Pass custom header(s) to server
  -k, --insecure      Allow insecure server connections when using SSL
