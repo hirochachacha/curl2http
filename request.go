@@ -3,6 +3,7 @@ package curl2http
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -25,6 +26,8 @@ var SupportedRequestFlags = map[string]bool{
 	"--cookie":         true,
 	"-A":               true,
 	"--user-agent":     true,
+	"-u":               true,
+	"--user":           true,
 	"-k":               true,
 	"--insecure":       true,
 	"-d":               true,
@@ -102,6 +105,12 @@ func NewRequestFromFlagSet(fs *FlagSet) (client *http.Client, req *http.Request,
 	}
 	if flg := fs.LongFlag("user-agent"); flg.IsSet {
 		headers = append(headers, [2]string{"User-Agent", flg.Value(-1)})
+	}
+	if flg := fs.LongFlag("user"); flg.IsSet {
+		headers = append(headers, [2]string{
+			"Authorization",
+			"Basic " + base64.StdEncoding.EncodeToString([]byte(flg.Value(-1))),
+		})
 	}
 	if flg := fs.LongFlag("insecure"); flg.IsSet {
 		client.Transport = &http.Transport{

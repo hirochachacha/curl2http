@@ -11,20 +11,31 @@ import (
 )
 
 func TestRequest(t *testing.T) {
-	_, req, err := curl2http.NewRequestFromArgs([]string{"curl", "www.example.com/get"})
+	_, req, err := curl2http.NewRequestFromArgs([]string{"curl", "https://www.example.com/get"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if req.URL.String() != "www.example.com/get" {
-		t.Errorf("want %q, but %q", "www.example.com/get", req.URL.String())
+	if req.URL.String() != "https://www.example.com/get" {
+		t.Errorf("want %q, but %q", "https://www.example.com/get", req.URL.String())
 	}
 
-	_, req, err = curl2http.NewRequestFromArgs([]string{"curl", "-I", "-A", "myua", "-b", "session=10", "www.example.com/get"})
+	_, req, err = curl2http.NewRequestFromArgs([]string{"curl", "-u", "user:passwd", "https://www.example.com/get"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if req.URL.String() != "www.example.com/get" {
-		t.Errorf("want %q, but %q", "www.example.com/get", req.URL.String())
+	if req.URL.String() != "https://www.example.com/get" {
+		t.Errorf("want %q, but %q", "https://www.example.com/get", req.URL.String())
+	}
+	if req.Header.Get("Authorization") != "Basic dXNlcjpwYXNzd2Q=" {
+		t.Errorf("want %q, but %q", "Basic dXNlcjpwYXNzd2Q=", req.Header.Get("Authorization"))
+	}
+
+	_, req, err = curl2http.NewRequestFromArgs([]string{"curl", "-I", "-A", "myua", "-b", "session=10", "https://www.example.com/get"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if req.URL.String() != "https://www.example.com/get" {
+		t.Errorf("want %q, but %q", "https://www.example.com/get", req.URL.String())
 	}
 	if req.Method != "HEAD" {
 		t.Errorf("want %q, but %q", "HEAD", req.Method)
@@ -36,12 +47,12 @@ func TestRequest(t *testing.T) {
 		t.Errorf("want %q, but %q", "session=10", req.Header.Get("Cookie"))
 	}
 
-	_, req, err = curl2http.NewRequestFromArgs([]string{"curl", "-X", "POST", "-d", "a=b", "-d", "c=d\ne\n", "www.example.com/post"})
+	_, req, err = curl2http.NewRequestFromArgs([]string{"curl", "-X", "POST", "-d", "a=b", "-d", "c=d\ne\n", "https://www.example.com/post"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if req.URL.String() != "www.example.com/post" {
-		t.Errorf("want %q, but %q", "www.example.com/post", req.URL.String())
+	if req.URL.String() != "https://www.example.com/post" {
+		t.Errorf("want %q, but %q", "https://www.example.com/post", req.URL.String())
 	}
 	if req.Header.Get("Content-Type") != "application/x-www-form-urlencoded" {
 		t.Errorf("want %q, but %q", "application/x-www-form-urlencoded", req.Header.Get("Content-Type"))
@@ -51,12 +62,12 @@ func TestRequest(t *testing.T) {
 		t.Errorf("want %q, but %q", "a=b&c=de", string(body))
 	}
 
-	_, req, err = curl2http.NewRequestFromArgs([]string{"curl", "-X", "POST", "-d", "@testdata/data.txt", "-d", "@testdata/data2.txt", "www.example.com/post"})
+	_, req, err = curl2http.NewRequestFromArgs([]string{"curl", "-X", "POST", "-d", "@testdata/data.txt", "-d", "@testdata/data2.txt", "https://www.example.com/post"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if req.URL.String() != "www.example.com/post" {
-		t.Errorf("want %q, but %q", "www.example.com/post", req.URL.String())
+	if req.URL.String() != "https://www.example.com/post" {
+		t.Errorf("want %q, but %q", "https://www.example.com/post", req.URL.String())
 	}
 	if req.Header.Get("Content-Type") != "application/x-www-form-urlencoded" {
 		t.Errorf("want %q, but %q", "application/x-www-form-urlencoded", req.Header.Get("Content-Type"))
@@ -67,24 +78,24 @@ func TestRequest(t *testing.T) {
 	}
 
 	json := "{\n\t\"FirstName\": \"hiro\", \n\t\"Age\": 4444\n}"
-	_, req, err = curl2http.NewRequestFromArgs([]string{"curl", "-X", "POST", "-H", "Content-Type: application/json", "--data-binary", json, "www.example.com/post"})
+	_, req, err = curl2http.NewRequestFromArgs([]string{"curl", "-X", "POST", "-H", "Content-Type: application/json", "--data-binary", json, "https://www.example.com/post"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if req.URL.String() != "www.example.com/post" {
-		t.Errorf("want %q, but %q", "www.example.com/post", req.URL.String())
+	if req.URL.String() != "https://www.example.com/post" {
+		t.Errorf("want %q, but %q", "https://www.example.com/post", req.URL.String())
 	}
 	body, err = ioutil.ReadAll(req.Body)
 	if string(body) != json {
 		t.Errorf("want %q, but %q", json, string(body))
 	}
 
-	_, req, err = curl2http.NewRequestFromArgs([]string{"curl", "-X", "POST", "--data-urlencode", "=<bbb>", "--data-urlencode", "aa=<fa>", "--data-urlencode", "@testdata/data.txt", "--data-urlencode", "eg@testdata/data2.txt", "www.example.com/post"})
+	_, req, err = curl2http.NewRequestFromArgs([]string{"curl", "-X", "POST", "--data-urlencode", "=<bbb>", "--data-urlencode", "aa=<fa>", "--data-urlencode", "@testdata/data.txt", "--data-urlencode", "eg@testdata/data2.txt", "https://www.example.com/post"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if req.URL.String() != "www.example.com/post" {
-		t.Errorf("want %q, but %q", "www.example.com/post", req.URL.String())
+	if req.URL.String() != "https://www.example.com/post" {
+		t.Errorf("want %q, but %q", "https://www.example.com/post", req.URL.String())
 	}
 	if req.Header.Get("Content-Type") != "application/x-www-form-urlencoded" {
 		t.Errorf("want %q, but %q", "application/x-www-form-urlencoded", req.Header.Get("Content-Type"))
@@ -94,13 +105,13 @@ func TestRequest(t *testing.T) {
 		t.Errorf("want %q, but %q", "%3Cbbb%3E&aa=%3Cfa%3E&a%3Db%26c%3Dd%0A&eg=e%3Df%0A%26%0Ag%3Dh%0A", string(body))
 	}
 
-	_, req, err = curl2http.NewRequestFromArgs([]string{"curl", "-X", "POST", "-F", "aa=bbb", "-F", "cc=dddd;type=text/plain", "-F", "kk=@testdata/data.txt", "www.example.com/post"})
+	_, req, err = curl2http.NewRequestFromArgs([]string{"curl", "-X", "POST", "-F", "aa=bbb", "-F", "cc=dddd;type=text/plain", "-F", "kk=@testdata/data.txt", "https://www.example.com/post"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if req.URL.String() != "www.example.com/post" {
-		t.Errorf("want %q, but %q", "www.example.com/post", req.URL.String())
+	if req.URL.String() != "https://www.example.com/post" {
+		t.Errorf("want %q, but %q", "https://www.example.com/post", req.URL.String())
 	}
 	if !strings.HasPrefix(req.Header.Get("Content-Type"), "multipart/form-data") {
 		t.Errorf("want %q, but %q", "multipart/form-data", req.Header.Get("Content-Type"))

@@ -70,6 +70,7 @@ Supported flags
  -k, --insecure      Allow insecure server connections when using SSL
  -X, --request <command> Specify request command to use
      --url <url>     URL to work with
+ -u, --user <user:password> Server user and password
  -A, --user-agent <name> Send User-Agent <name> to server
 ```
 
